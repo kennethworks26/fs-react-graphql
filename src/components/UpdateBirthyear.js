@@ -32,7 +32,7 @@ const UpdateBirthyear = () => {
     const submit = async (event) => {
         event.preventDefault();
 
-        console.log(`updating ${name.value} birthyear...`);
+        console.log(`updating ${name} birthyear...`);
 
         editAuthor({ variables: { name, born } });
 
