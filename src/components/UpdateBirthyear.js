@@ -4,68 +4,68 @@ import { ALL_AUTHORS, EDIT_AUTHOR } from "./queries";
 import Select from "react-select";
 
 const UpdateBirthyear = () => {
-    const [name, setName] = useState(null);
-    const [selectedName, setSelectedName] = useState(null);
-    const [born, setBorn] = useState("");
-    const [error, setError] = useState(null);
-    const authors = useQuery(ALL_AUTHORS);
+  const [name, setName] = useState(null);
+  const [selectedName, setSelectedName] = useState(null);
+  const [born, setBorn] = useState("");
+  const [error, setError] = useState(null);
+  const authors = useQuery(ALL_AUTHORS);
 
-    const options = authors.data.allAuthors.map((author) => {
-        return { value: author.name, label: author.name };
+  const options = authors.data.allAuthors.map((author) => {
+    return { value: author.name, label: author.name };
+  });
+
+  const [editAuthor] = useMutation(EDIT_AUTHOR, {
+    refetchQueries: [{ query: ALL_AUTHORS }],
+    onError: (error) => {
+      setError(error.graphQLErrors[0].message);
+    },
+  });
+
+  const handleNameChange = (event) => {
+    setName(event.value);
+    setSelectedName({
+      value: event.value,
+      label: event.label,
     });
+  };
 
-    const [editAuthor] = useMutation(EDIT_AUTHOR, {
-        refetchQueries: [{ query: ALL_AUTHORS }],
-        onError: (error) => {
-            setError(error.graphQLErrors[0].message);
-        },
-    });
+  const submit = async (event) => {
+    event.preventDefault();
 
-    const handleNameChange = (event) => {
-        setName(event.value);
-        setSelectedName({
-            value: event.value,
-            label: event.label,
-        });
-    };
+    console.log(`updating ${name} birthyear...`);
 
-    const submit = async (event) => {
-        event.preventDefault();
+    editAuthor({ variables: { name, born } });
 
-        console.log(`updating ${name} birthyear...`);
+    setName("");
+    setBorn("");
+  };
 
-        editAuthor({ variables: { name, born } });
+  return (
+    <div>
+      <h2>Set birthyear</h2>
 
-        setName("");
-        setBorn("");
-    };
-
-    return (
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <form onSubmit={submit}>
         <div>
-            <h2>Set birthyear</h2>
-
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            <form onSubmit={submit}>
-                <div>
-                    name
-                    <Select
-                        value={selectedName}
-                        onChange={handleNameChange}
-                        options={options}
-                    />
-                </div>
-                <div>
-                    born
-                    <input
-                        type="number"
-                        value={born}
-                        onChange={({ target }) => setBorn(+target.value)}
-                    />
-                </div>
-                <button type="submit">update author</button>
-            </form>
+          name
+          <Select
+            value={selectedName}
+            onChange={handleNameChange}
+            options={options}
+          />
         </div>
-    );
+        <div>
+          born
+          <input
+            type="number"
+            value={born}
+            onChange={({ target }) => setBorn(+target.value)}
+          />
+        </div>
+        <button type="submit">update author</button>
+      </form>
+    </div>
+  );
 };
 
 export default UpdateBirthyear;
